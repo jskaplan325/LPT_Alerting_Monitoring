@@ -1,0 +1,63 @@
+{
+    "_comment": "Reveal AI Monitoring Configuration",
+    "_instructions": "Copy this file to config.json and update with your values",
+
+    "reveal_host": "https://your-instance.revealdata.com",
+    "nia_host": "http://your-nia-server",
+    "nia_port": 5566,
+
+    "username": "your-username",
+    "password": "your-password",
+
+    "_comment_health": "API Health Monitor Settings",
+    "timeout_seconds": 10,
+    "response_time_warning_ms": 2000,
+    "response_time_high_ms": 5000,
+    "response_time_critical_ms": 10000,
+
+    "_comment_jobs": "Job Monitor Settings",
+    "lookback_hours": 24,
+    "stuck_job_warning_hours": 4,
+    "stuck_job_high_hours": 8,
+    "stuck_job_critical_hours": 24,
+    "failed_jobs_warning": 1,
+    "failed_jobs_high": 3,
+    "failed_jobs_critical": 5,
+
+    "_comment_exports": "Export Monitor Settings",
+    "export_docs_warning": 1000,
+    "export_docs_high": 5000,
+    "export_docs_critical": 10000,
+    "business_hours_start": 7,
+    "business_hours_end": 19,
+    "alert_after_hours": true,
+
+    "notifications": {
+        "_comment_email": "Email notification settings",
+        "email_enabled": false,
+        "smtp_server": "smtp.office365.com",
+        "smtp_port": 587,
+        "smtp_username": "alerts@company.com",
+        "smtp_password": "your-smtp-password",
+        "email_from": "alerts@company.com",
+        "email_to": ["oncall@company.com", "admin@company.com"],
+
+        "_comment_slack": "Slack webhook settings",
+        "slack_enabled": false,
+        "slack_webhook_url": "https://hooks.slack.com/services/YOUR/WEBHOOK/URL",
+
+        "_comment_pagerduty": "PagerDuty settings",
+        "pagerduty_enabled": false,
+        "pagerduty_routing_key": "your-pagerduty-routing-key",
+
+        "_comment_teams": "Microsoft Teams settings",
+        "teams_enabled": false,
+        "teams_webhook_url": "https://outlook.office.com/webhook/YOUR/WEBHOOK/URL",
+
+        "_comment_webhook": "Generic webhook for custom integrations",
+        "webhook_enabled": false,
+        "webhook_url": "https://your-webhook-endpoint.com/alerts"
+    },
+
+    "state_file": "/tmp/reveal_monitor_state.json"
+}
