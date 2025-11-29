@@ -51,5 +51,9 @@
 
     "log_file": "/var/log/telemetry_agent_monitor.log",
     "log_level": "INFO",
-    "state_file": "/tmp/telemetry_agent_state.json"
+    "state_file": "/tmp/telemetry_agent_state.json",
+
+    "_comment_scom": "SCOM Integration (Windows Event Log)",
+    "scom_enabled": false,
+    "scom_fallback_file": "/var/log/scom_events.json"
 }

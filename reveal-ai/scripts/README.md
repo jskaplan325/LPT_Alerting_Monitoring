@@ -337,6 +337,46 @@ curl "http://[server]:5566/nia/jobs"
 
 ---
 
+## SCOM Integration
+
+All Reveal AI monitoring scripts support Microsoft SCOM (System Center Operations Manager) integration via Windows Event Log.
+
+**Enable SCOM Integration:**
+
+```json
+{
+    "scom_enabled": true,
+    "scom_fallback_file": "/var/log/scom_events.json"
+}
+```
+
+**Event Sources:**
+- `RevealAI-Monitor` - All Reveal AI events
+
+**Event ID Ranges:**
+
+| Monitor | Event IDs | Description |
+|---------|-----------|-------------|
+| API Health | 2000-2004 | OK, INFO, WARNING, HIGH, CRITICAL |
+| Job Monitor | 2100-2104 | OK, INFO, WARNING, HIGH, CRITICAL |
+| Export Monitor | 2200-2204 | OK, INFO, WARNING, HIGH, CRITICAL |
+
+**Setup (Run as Administrator):**
+
+```powershell
+# Register event source
+if (-not [System.Diagnostics.EventLog]::SourceExists("RevealAI-Monitor")) {
+    [System.Diagnostics.EventLog]::CreateEventSource("RevealAI-Monitor", "Application")
+}
+```
+
+**Requirements:**
+```bash
+pip install pywin32  # Windows only
+```
+
+---
+
 ## Vendor Contact
 
 For API documentation and support:

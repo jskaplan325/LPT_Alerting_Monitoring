@@ -28,6 +28,13 @@ except ImportError:
     print("ERROR: requests library required. Install with: pip install requests")
     sys.exit(1)
 
+# Import SCOM integration (optional)
+try:
+    from scom_integration import SCOMIntegration
+    SCOM_AVAILABLE = True
+except ImportError:
+    SCOM_AVAILABLE = False
+
 
 # Alert levels with exit codes
 ALERT_LEVELS = {
@@ -55,7 +62,9 @@ DEFAULT_CONFIG = {
         "teams_enabled": False,
         "webhook_enabled": False
     },
-    "state_file": "/tmp/reveal_api_health_state.json"
+    "state_file": "/tmp/reveal_api_health_state.json",
+    "scom_enabled": False,
+    "scom_fallback_file": "/var/log/scom_events.json"
 }
 
 
@@ -105,6 +114,12 @@ class RevealAPIHealthMonitor:
             level=log_level,
             format='%(asctime)s - %(levelname)s - %(message)s'
         )
+
+        # Initialize SCOM integration
+        self.scom = None
+        if SCOM_AVAILABLE and self.config.get("scom_enabled", False):
+            self.scom = SCOMIntegration(self.config, logging.getLogger(), "reveal_api_health", "reveal")
+            logging.info("SCOM integration enabled")
 
     def check_nia_health(self) -> Dict[str, Any]:
         """Check NIA API health endpoint."""
@@ -442,8 +457,29 @@ class RevealAPIHealthMonitor:
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to send webhook notification: {e}")
 
+    def send_scom(self, result: Dict):
+        """Write event to SCOM via Windows Event Log."""
+        if not self.scom:
+            return
+
+        try:
+            check_result = {
+                "level": result.get("level", "UNKNOWN"),
+                "message": result.get("alert_message", ""),
+                "nia_status": result.get("nia_status"),
+                "rest_status": result.get("rest_status"),
+                "response_time_ms": result.get("response_time_ms")
+            }
+            self.scom.write_check_result(check_result)
+            logging.info("SCOM event written")
+        except Exception as e:
+            logging.error(f"Failed to write SCOM event: {e}")
+
     def send_notifications(self, result: Dict):
         """Send all configured notifications."""
+        # Always write to SCOM (even for OK status)
+        self.send_scom(result)
+
         if self.dry_run:
             logging.info(f"DRY RUN: Would send {result['level']} alert: {result['alert_message']}")
             return

@@ -237,6 +237,47 @@ The OAuth client or user account needs permissions to:
 - Use HTTPS for all webhook URLs
 - Rotate credentials regularly
 
+### SCOM Integration
+
+All monitoring scripts support Microsoft SCOM (System Center Operations Manager) integration via Windows Event Log.
+
+**Enable SCOM Integration:**
+
+```json
+{
+    "scom_enabled": true,
+    "scom_fallback_file": "/var/log/scom_events.json"
+}
+```
+
+**Event Sources:**
+- `RelativityOne-Monitor` - All RelativityOne events
+
+**Event ID Ranges:**
+
+| Monitor | Event IDs | Description |
+|---------|-----------|-------------|
+| Telemetry Agent | 1000-1004 | OK, INFO, WARNING, HIGH, CRITICAL |
+| Billing Agent | 1100-1104 | OK, INFO, WARNING, HIGH, CRITICAL |
+| Worker Health | 1200-1204 | OK, INFO, WARNING, HIGH, CRITICAL |
+| Job Queue | 1300-1304 | OK, INFO, WARNING, HIGH, CRITICAL |
+| Security Audit | 1400-1404 | OK, INFO, WARNING, HIGH, CRITICAL |
+| Alert Manager | 1500-1504 | OK, INFO, WARNING, HIGH, CRITICAL |
+
+**Setup (Run as Administrator):**
+
+```powershell
+# Register event source
+if (-not [System.Diagnostics.EventLog]::SourceExists("RelativityOne-Monitor")) {
+    [System.Diagnostics.EventLog]::CreateEventSource("RelativityOne-Monitor", "Application")
+}
+```
+
+**Requirements:**
+```bash
+pip install pywin32  # Windows only
+```
+
 ### Related Documentation
 
 - [RUNBOOK-018: Telemetry Agent Critical](../runbooks/RUNBOOK-018_Telemetry_Agent_Critical.md)

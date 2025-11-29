@@ -59,5 +59,9 @@
         "webhook_url": "https://your-webhook-endpoint.com/alerts"
     },
 
-    "state_file": "/tmp/reveal_monitor_state.json"
+    "state_file": "/tmp/reveal_monitor_state.json",
+
+    "_comment_scom": "SCOM Integration (Windows Event Log)",
+    "scom_enabled": false,
+    "scom_fallback_file": "/var/log/scom_events.json"
 }

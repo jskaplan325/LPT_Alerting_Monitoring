@@ -39,6 +39,13 @@ except ImportError:
     print("ERROR: python-dateutil library required. Install with: pip install python-dateutil")
     sys.exit(1)
 
+# Import SCOM integration (optional)
+try:
+    from scom_integration import SCOMIntegration
+    SCOM_AVAILABLE = True
+except ImportError:
+    SCOM_AVAILABLE = False
+
 
 # Alert levels with exit codes
 ALERT_LEVELS = {
@@ -78,7 +85,9 @@ DEFAULT_CONFIG = {
         "teams_enabled": False,
         "webhook_enabled": False
     },
-    "state_file": "/tmp/job_queue_state.json"
+    "state_file": "/tmp/job_queue_state.json",
+    "scom_enabled": False,
+    "scom_fallback_file": "/var/log/scom_events.json"
 }
 
 
@@ -138,6 +147,12 @@ class JobQueueMonitor:
             level=log_level,
             format='%(asctime)s - %(levelname)s - %(message)s'
         )
+
+        # Initialize SCOM integration
+        self.scom = None
+        if SCOM_AVAILABLE and self.config.get("scom_enabled", False):
+            self.scom = SCOMIntegration(self.config, logging.getLogger(), "job_queue", "relativity")
+            logging.info("SCOM integration enabled")
 
     def get_headers(self) -> Dict[str, str]:
         """Get standard headers for API requests."""
@@ -662,8 +677,30 @@ See RUNBOOK-001 (Processing), RUNBOOK-002 (Production), RUNBOOK-003 (Imaging) fo
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to send webhook notification: {e}")
 
+    def send_scom(self, result: Dict):
+        """Write event to SCOM via Windows Event Log."""
+        if not self.scom:
+            return
+
+        try:
+            check_result = {
+                "level": result.get("level", "UNKNOWN"),
+                "message": result.get("alert_message", ""),
+                "total_failed": result.get("total_failed"),
+                "total_stuck": result.get("total_stuck"),
+                "failed_jobs_count": len(result.get("failed_jobs", [])),
+                "stuck_jobs_count": len(result.get("stuck_jobs", []))
+            }
+            self.scom.write_check_result(check_result)
+            logging.info("SCOM event written")
+        except Exception as e:
+            logging.error(f"Failed to write SCOM event: {e}")
+
     def send_notifications(self, result: Dict):
         """Send all configured notifications."""
+        # Always write to SCOM (even for OK status)
+        self.send_scom(result)
+
         if self.dry_run:
             logging.info(f"DRY RUN: Would send {result['level']} alert: {result['alert_message']}")
             return

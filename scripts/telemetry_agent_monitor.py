@@ -10,6 +10,7 @@ or your preferred scheduling system.
 
 Requirements:
     pip install requests python-dateutil
+    pip install pywin32  (Windows only, for SCOM integration)
 
 Configuration:
     Set environment variables or update the CONFIG section below.
@@ -17,6 +18,10 @@ Configuration:
 Usage:
     python telemetry_agent_monitor.py
     python telemetry_agent_monitor.py --config /path/to/config.json
+
+SCOM Integration:
+    Enable scom_enabled in config to write events to Windows Event Log.
+    Event IDs 1000-1004 (OK, INFO, WARNING, HIGH, CRITICAL)
 """
 
 import os
@@ -38,6 +43,13 @@ except ImportError:
     print("ERROR: Required packages not installed.")
     print("Run: pip install requests python-dateutil")
     sys.exit(1)
+
+# Import SCOM integration (optional)
+try:
+    from scom_integration import SCOMIntegration
+    SCOM_AVAILABLE = True
+except ImportError:
+    SCOM_AVAILABLE = False
 
 
 # =============================================================================
@@ -102,6 +114,10 @@ CONFIG = {
 
     # State file to track alert state (avoid duplicate alerts)
     "state_file": os.environ.get("STATE_FILE", "/tmp/telemetry_agent_state.json"),
+
+    # SCOM Integration (Windows Event Log)
+    "scom_enabled": os.environ.get("SCOM_ENABLED", "false").lower() == "true",
+    "scom_fallback_file": os.environ.get("SCOM_FALLBACK_FILE", "/var/log/scom_events.json"),
 }
 
 
@@ -398,7 +414,14 @@ class NotificationManager:
 
     def __init__(self, config: Dict, logger: logging.Logger):
         self.config = config["notifications"]
+        self.full_config = config
         self.logger = logger
+
+        # Initialize SCOM integration
+        self.scom = None
+        if SCOM_AVAILABLE and config.get("scom_enabled", False):
+            self.scom = SCOMIntegration(config, logger, "telemetry_agent", "relativity")
+            self.logger.info("SCOM integration enabled")
 
     def send_email(self, subject: str, body: str, is_html: bool = False):
         """Send email notification."""
@@ -565,15 +588,29 @@ class NotificationManager:
         except Exception as e:
             self.logger.error(f"Failed to send webhook notification: {e}")
 
+    def send_scom_event(self, check_result: Dict):
+        """Write event to SCOM via Windows Event Log."""
+        if not self.scom:
+            return
+
+        try:
+            self.scom.write_check_result(check_result)
+            self.logger.info("SCOM event written")
+        except Exception as e:
+            self.logger.error(f"Failed to write SCOM event: {e}")
+
     def send_alert(self, check_result: Dict):
         """Send alerts via all configured channels."""
         level = check_result.get("level", "UNKNOWN")
         message = check_result.get("message", "Unknown issue")
         details = check_result.get("details", "")
 
-        # Only send alerts for WARNING and above
+        # Always write to SCOM (even for OK status)
+        self.send_scom_event(check_result)
+
+        # Only send other alerts for WARNING and above
         if level == "OK":
-            self.logger.info("Status OK - no alerts sent")
+            self.logger.info("Status OK - no additional alerts sent")
             return
 
         self.logger.info(f"Sending {level} alerts...")

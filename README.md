@@ -208,6 +208,7 @@ python reveal-ai/scripts/reveal_api_health_monitor.py --config reveal-ai/scripts
 |---------|-------------|
 | **Authentication** | OAuth 2.0 (RelativityOne), Session Token (Reveal AI) |
 | **Multi-Channel Alerts** | Email, Slack, PagerDuty, Microsoft Teams, Webhooks |
+| **SCOM Integration** | Windows Event Log for Microsoft SCOM monitoring |
 | **State Tracking** | Prevents duplicate alerts, tracks state changes |
 | **Exit Codes** | 0=OK, 1=WARN, 2=HIGH, 3=CRITICAL |
 | **Dry Run Mode** | Test without sending alerts |
@@ -264,9 +265,13 @@ python reveal-ai/scripts/reveal_api_health_monitor.py --config reveal-ai/scripts
 - Python 3.8+
 - `requests` library
 - `python-dateutil` library
+- `pywin32` library (Windows only, for SCOM integration)
 
 ```bash
 pip install requests python-dateutil
+
+# For SCOM integration on Windows:
+pip install pywin32
 ```
 
 ---
