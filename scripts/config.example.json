@@ -1,0 +1,55 @@
+{
+    "_comment": "RelativityOne Telemetry Agent Monitor Configuration",
+    "_instructions": "Copy this file to config.json and update with your values",
+
+    "relativity_host": "https://your-instance.relativity.one",
+    "client_id": "your-oauth-client-id",
+    "client_secret": "your-oauth-client-secret",
+    "auth_method": "bearer",
+
+    "_comment_alt_auth": "Alternative: Basic auth (less secure)",
+    "username": "",
+    "password": "",
+
+    "agent_name_contains": "Telemetry",
+
+    "_comment_thresholds": "Thresholds for alerting",
+    "warning_threshold_hours": 6,
+    "high_threshold_hours": 12,
+    "critical_threshold_hours": 24,
+
+    "activity_warning_minutes": 30,
+    "activity_high_minutes": 60,
+    "activity_critical_minutes": 120,
+
+    "notifications": {
+        "_comment_email": "Email notification settings",
+        "email_enabled": false,
+        "smtp_server": "smtp.office365.com",
+        "smtp_port": 587,
+        "smtp_username": "alerts@company.com",
+        "smtp_password": "your-smtp-password",
+        "email_from": "alerts@company.com",
+        "email_to": ["oncall@company.com", "admin@company.com"],
+
+        "_comment_slack": "Slack webhook settings",
+        "slack_enabled": false,
+        "slack_webhook_url": "https://hooks.slack.com/services/YOUR/WEBHOOK/URL",
+
+        "_comment_pagerduty": "PagerDuty settings",
+        "pagerduty_enabled": false,
+        "pagerduty_routing_key": "your-pagerduty-routing-key",
+
+        "_comment_teams": "Microsoft Teams settings",
+        "teams_enabled": false,
+        "teams_webhook_url": "https://outlook.office.com/webhook/YOUR/WEBHOOK/URL",
+
+        "_comment_webhook": "Generic webhook for custom integrations",
+        "webhook_enabled": false,
+        "webhook_url": "https://your-webhook-endpoint.com/alerts"
+    },
+
+    "log_file": "/var/log/telemetry_agent_monitor.log",
+    "log_level": "INFO",
+    "state_file": "/tmp/telemetry_agent_state.json"
+}
