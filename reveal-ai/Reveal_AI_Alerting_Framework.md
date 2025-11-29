@@ -48,10 +48,18 @@ This framework addresses these gaps through:
 | Limitation | Impact | Mitigation |
 |------------|--------|------------|
 | **No Webhooks** | All monitoring must poll | Implement scheduled polling at appropriate intervals |
-| **No Native SIEM Connectors** | No Splunk/Sentinel/Datadog integration | Custom polling scripts with SIEM-compatible output |
+| **No Native SIEM Connectors** | No Splunk/Sentinel/Datadog integration | Custom polling scripts with SCOM/SIEM-compatible output |
 | **No Public Status Page** | Cannot monitor platform health externally | Poll `/nia/version` endpoint directly |
 | **No Dedicated Audit API** | Security monitoring via report exports | Scheduled extraction of User Login/Document History reports |
 | **Rate Limits Undocumented** | Risk of throttling | Conservative polling intervals, vendor engagement |
+
+### SCOM Integration
+
+All Reveal AI monitoring scripts include built-in SCOM integration via Windows Event Log. Enable with `"scom_enabled": true`.
+
+- **Event Source:** `RevealAI-Monitor`
+- **Event IDs:** 2000-2299 (API Health, Job Monitor, Export Monitor)
+- See [scripts/README.md](scripts/README.md) for event ID mapping
 
 ---
 

@@ -8,7 +8,7 @@ A comprehensive alerting and monitoring solution for **RelativityOne** and **Rev
 
 | Platform | Runbooks | Scripts | API Support |
 |----------|----------|---------|-------------|
-| **RelativityOne** | 18 | 7 | OAuth 2.0, REST API, Webhooks |
+| **RelativityOne** | 18 | 6 | OAuth 2.0, REST API, Webhooks |
 | **Reveal AI** | 8 | 3 | Session Token, REST API, Polling |
 
 ---
@@ -27,7 +27,8 @@ LPT_Alerting_Monitoring/
 ├── scripts/                               # RelativityOne Scripts
 │   ├── README.md                          # Script documentation
 │   ├── config.example.json                # Configuration template
-│   └── *.py                               # 7 monitoring scripts
+│   ├── scom_integration.py                # SCOM/Event Log helper module
+│   └── *_monitor.py                       # 6 monitoring scripts
 │
 └── reveal-ai/                             # Reveal AI Platform
     ├── Reveal_AI_Alerting_Framework.md    # Reveal AI architecture
@@ -37,7 +38,8 @@ LPT_Alerting_Monitoring/
     └── scripts/
         ├── README.md                      # Script documentation
         ├── config.example.json            # Configuration template
-        └── *.py                           # 3 monitoring scripts
+        ├── scom_integration.py            # SCOM/Event Log helper module
+        └── reveal_*_monitor.py            # 3 monitoring scripts
 ```
 
 ---

@@ -246,6 +246,44 @@ query: "avg(last_15m):avg:ediscovery.production.queue_time{*} > 7200"
 message: "Production job stuck in queue for >2 hours"
 ```
 
+### Microsoft SCOM
+
+All monitoring scripts include built-in SCOM integration via Windows Event Log. Enable with `"scom_enabled": true` in config.
+
+**Event Sources:**
+- `RelativityOne-Monitor` - All RelativityOne events (Event IDs 1000-1599)
+- `RevealAI-Monitor` - All Reveal AI events (Event IDs 2000-2299)
+
+**Event ID Mapping:**
+
+| Monitor | Base ID | OK | WARNING | HIGH | CRITICAL |
+|---------|---------|-----|---------|------|----------|
+| Telemetry Agent | 1000 | 1000 | 1002 | 1003 | 1004 |
+| Billing Agent | 1100 | 1100 | 1102 | 1103 | 1104 |
+| Worker Health | 1200 | 1200 | 1202 | 1203 | 1204 |
+| Job Queue | 1300 | 1300 | 1302 | 1303 | 1304 |
+| Security Audit | 1400 | 1400 | 1402 | 1403 | 1404 |
+| Alert Manager | 1500 | 1500 | 1502 | 1503 | 1504 |
+| Reveal API Health | 2000 | 2000 | 2002 | 2003 | 2004 |
+| Reveal Job Monitor | 2100 | 2100 | 2102 | 2103 | 2104 |
+| Reveal Export | 2200 | 2200 | 2202 | 2203 | 2204 |
+
+**SCOM Management Pack Rules:**
+
+```xml
+<!-- Alert on Critical events -->
+<Rule ID="eDiscovery.Critical.Alert">
+  <DataSource>
+    <EventLog>Application</EventLog>
+    <EventSource>RelativityOne-Monitor</EventSource>
+    <EventID>1004,1104,1204,1304,1404,1504</EventID>
+  </DataSource>
+  <WriteAction>
+    <AlertSeverity>Critical</AlertSeverity>
+  </WriteAction>
+</Rule>
+```
+
 ---
 
 ## Escalation Procedures
