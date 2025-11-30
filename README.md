@@ -9,6 +9,7 @@ A comprehensive alerting and monitoring solution for **RelativityOne** and **Rev
 | Platform | Runbooks | Scripts | API Support |
 |----------|----------|---------|-------------|
 | **RelativityOne** | 18 | 6 | OAuth 2.0, REST API, Webhooks |
+| **RelativityOne aiR** | 2 | 1 | Object Manager API, Polling |
 | **Reveal AI** | 8 | 3 | Session Token, REST API, Polling |
 
 ---
@@ -21,14 +22,18 @@ LPT_Alerting_Monitoring/
 │
 ├── relativity-one/                        # RelativityOne Platform
 │   ├── eDiscovery_Alerting_Framework.md   # RelativityOne architecture
+│   ├── aiR_Alerting_Framework.md          # aiR for Review & Privilege monitoring
 │   ├── runbooks/
 │   │   ├── README.md                      # Runbook index
-│   │   └── RUNBOOK-001 through RUNBOOK-018
+│   │   ├── RUNBOOK-001 through RUNBOOK-018
+│   │   ├── RUNBOOK-AIR-001                # aiR for Review job failures
+│   │   └── RUNBOOK-AIR-002                # aiR for Privilege pipeline failures
 │   └── scripts/
 │       ├── README.md                      # Script documentation
 │       ├── config.example.json            # Configuration template
 │       ├── scom_integration.py            # SCOM/Event Log helper
-│       └── *_monitor.py                   # 6 monitoring scripts
+│       ├── *_monitor.py                   # 6 core monitoring scripts
+│       └── air_job_monitor.py             # aiR for Review & Privilege monitor
 │
 └── reveal-ai/                             # Reveal AI Platform
     ├── Reveal_AI_Alerting_Framework.md    # Reveal AI architecture
@@ -99,6 +104,70 @@ python relativity-one/scripts/telemetry_agent_monitor.py --config relativity-one
 
 # 4. Run
 python relativity-one/scripts/telemetry_agent_monitor.py --config relativity-one/scripts/config.json
+```
+
+---
+
+# Relativity aiR (aiR for Review & aiR for Privilege)
+
+## Overview
+
+Relativity aiR products use Azure OpenAI's GPT-4 Omni model for AI-powered document analysis:
+
+| Product | Purpose | Workflow |
+|---------|---------|----------|
+| **aiR for Review** | Relevance analysis, key document identification, issue categorization | Develop → Validate → Apply |
+| **aiR for Privilege** | Privilege prediction and classification | 6-step sequential pipeline |
+
+## Monitoring Script
+
+| Script | Purpose | Polling | Priority |
+|--------|---------|---------|----------|
+| `air_job_monitor.py` | aiR for Review jobs + aiR for Privilege pipelines | 5 min | **CRITICAL** |
+
+## aiR for Review Job Statuses
+
+| Status | Alert Level |
+|--------|-------------|
+| Not Started | INFO |
+| Queued | INFO (WARNING if >2h) |
+| In Progress | MONITOR (stuck detection) |
+| Completed | OK |
+| Cancelling | MEDIUM |
+| **Errored** | **CRITICAL** |
+
+## aiR for Privilege Pipeline Statuses
+
+| Status | Alert Level |
+|--------|-------------|
+| Not Started / Running | INFO |
+| Completed | OK |
+| **Run Failed** | **CRITICAL** |
+| **Apply Annotations Failed** | **HIGH** |
+| **Blocked** | **CRITICAL** |
+| Awaiting Annotations | WARNING if >24h |
+
+## aiR Runbooks
+
+| ID | Runbook | Severity |
+|----|---------|----------|
+| AIR-001 | aiR for Review Job Failures | CRITICAL/HIGH |
+| AIR-002 | aiR for Privilege Pipeline Failures | CRITICAL/HIGH |
+
+### Quick Start (aiR)
+
+```bash
+# Test aiR monitoring
+python relativity-one/scripts/air_job_monitor.py --config config.json --dry-run --verbose
+
+# Run aiR for Review only
+python relativity-one/scripts/air_job_monitor.py --config config.json --review-only
+
+# Run aiR for Privilege only
+python relativity-one/scripts/air_job_monitor.py --config config.json --privilege-only
+
+# Run both
+python relativity-one/scripts/air_job_monitor.py --config config.json
 ```
 
 ---
@@ -218,6 +287,159 @@ python reveal-ai/scripts/reveal_api_health_monitor.py --config reveal-ai/scripts
 
 ---
 
+## Microsoft SCOM Integration
+
+All monitoring scripts integrate with Microsoft System Center Operations Manager (SCOM) via Windows Event Log.
+
+### Event Sources
+
+| Platform | Event Source |
+|----------|-------------|
+| RelativityOne | `RelativityOne-Monitor` |
+| Reveal AI | `RevealAI-Monitor` |
+
+### Complete Event ID Map
+
+| Monitor | Base | OK | INFO | WARN | HIGH | CRIT |
+|---------|------|-----|------|------|------|------|
+| **RelativityOne** |
+| Telemetry Agent | 1000 | 1000 | 1001 | 1002 | 1003 | 1004 |
+| Billing Agent | 1100 | 1100 | 1101 | 1102 | 1103 | 1104 |
+| Worker Health | 1200 | 1200 | 1201 | 1202 | 1203 | 1204 |
+| Job Queue | 1300 | 1300 | 1301 | 1302 | 1303 | 1304 |
+| Security Audit | 1400 | 1400 | 1401 | 1402 | 1403 | 1404 |
+| Alert Manager | 1500 | 1500 | 1501 | 1502 | 1503 | 1504 |
+| aiR for Review | 1600 | 1600 | 1601 | 1602 | 1603 | 1604 |
+| aiR for Privilege | 1700 | 1700 | 1701 | 1702 | 1703 | 1704 |
+| **Reveal AI** |
+| API Health | 2000 | 2000 | 2001 | 2002 | 2003 | 2004 |
+| Job Monitor | 2100 | 2100 | 2101 | 2102 | 2103 | 2104 |
+| Export Monitor | 2200 | 2200 | 2201 | 2202 | 2203 | 2204 |
+
+### SCOM Setup
+
+**1. Register Event Sources (run as Administrator on monitoring server):**
+
+```powershell
+$sources = @("RelativityOne-Monitor", "RevealAI-Monitor")
+foreach ($source in $sources) {
+    if (-not [System.Diagnostics.EventLog]::SourceExists($source)) {
+        [System.Diagnostics.EventLog]::CreateEventSource($source, "Application")
+        Write-Host "Created event source: $source"
+    }
+}
+```
+
+Or use the built-in helper:
+```bash
+python relativity-one/scripts/scom_integration.py --setup
+```
+
+**2. Enable SCOM in config.json:**
+
+```json
+{
+  "scom_enabled": true
+}
+```
+
+**3. Install Windows dependencies:**
+
+```bash
+pip install pywin32
+```
+
+### SCOM Management Pack Rules
+
+**All Critical Alerts:**
+```xml
+<Rule ID="eDiscovery.Critical.Alert">
+  <DataSource>
+    <EventLog>Application</EventLog>
+    <EventSource>RelativityOne-Monitor</EventSource>
+    <EventID>1004,1104,1204,1304,1404,1504,1604,1704</EventID>
+  </DataSource>
+  <WriteAction>
+    <AlertSeverity>Critical</AlertSeverity>
+    <AlertDescription>eDiscovery critical alert detected</AlertDescription>
+  </WriteAction>
+</Rule>
+
+<Rule ID="RevealAI.Critical.Alert">
+  <DataSource>
+    <EventLog>Application</EventLog>
+    <EventSource>RevealAI-Monitor</EventSource>
+    <EventID>2004,2104,2204</EventID>
+  </DataSource>
+  <WriteAction>
+    <AlertSeverity>Critical</AlertSeverity>
+    <AlertDescription>Reveal AI critical alert detected</AlertDescription>
+  </WriteAction>
+</Rule>
+```
+
+**All High Severity Alerts:**
+```xml
+<Rule ID="eDiscovery.High.Alert">
+  <DataSource>
+    <EventLog>Application</EventLog>
+    <EventSource>RelativityOne-Monitor</EventSource>
+    <EventID>1003,1103,1203,1303,1403,1503,1603,1703</EventID>
+  </DataSource>
+  <WriteAction>
+    <AlertSeverity>Error</AlertSeverity>
+  </WriteAction>
+</Rule>
+
+<Rule ID="RevealAI.High.Alert">
+  <DataSource>
+    <EventLog>Application</EventLog>
+    <EventSource>RevealAI-Monitor</EventSource>
+    <EventID>2003,2103,2203</EventID>
+  </DataSource>
+  <WriteAction>
+    <AlertSeverity>Error</AlertSeverity>
+  </WriteAction>
+</Rule>
+```
+
+**All Warning Alerts:**
+```xml
+<Rule ID="eDiscovery.Warning.Alert">
+  <DataSource>
+    <EventLog>Application</EventLog>
+    <EventSource>RelativityOne-Monitor</EventSource>
+    <EventID>1002,1102,1202,1302,1402,1502,1602,1702</EventID>
+  </DataSource>
+  <WriteAction>
+    <AlertSeverity>Warning</AlertSeverity>
+  </WriteAction>
+</Rule>
+
+<Rule ID="RevealAI.Warning.Alert">
+  <DataSource>
+    <EventLog>Application</EventLog>
+    <EventSource>RevealAI-Monitor</EventSource>
+    <EventID>2002,2102,2202</EventID>
+  </DataSource>
+  <WriteAction>
+    <AlertSeverity>Warning</AlertSeverity>
+  </WriteAction>
+</Rule>
+```
+
+### Test SCOM Integration
+
+```bash
+# Test event writing
+python relativity-one/scripts/scom_integration.py --test
+
+# Verify in Event Viewer
+# Application Log → Filter by Source: RelativityOne-Monitor
+```
+
+---
+
 ## Recommended Polling Schedule
 
 ### RelativityOne
@@ -232,6 +454,7 @@ python reveal-ai/scripts/reveal_api_health_monitor.py --config reveal-ai/scripts
 # High - every 5 minutes
 */5 * * * * python /opt/monitoring/relativity-one/scripts/job_queue_monitor.py --config config.json
 */5 * * * * python /opt/monitoring/relativity-one/scripts/security_audit_monitor.py --config config.json
+*/5 * * * * python /opt/monitoring/relativity-one/scripts/air_job_monitor.py --config config.json
 ```
 
 ### Reveal AI
@@ -254,6 +477,7 @@ python reveal-ai/scripts/reveal_api_health_monitor.py --config reveal-ai/scripts
 | Document | Description |
 |----------|-------------|
 | [relativity-one/eDiscovery_Alerting_Framework.md](relativity-one/eDiscovery_Alerting_Framework.md) | RelativityOne architecture & design |
+| [relativity-one/aiR_Alerting_Framework.md](relativity-one/aiR_Alerting_Framework.md) | aiR for Review & Privilege monitoring |
 | [relativity-one/runbooks/README.md](relativity-one/runbooks/README.md) | RelativityOne runbook index |
 | [relativity-one/scripts/README.md](relativity-one/scripts/README.md) | RelativityOne script documentation |
 | [reveal-ai/Reveal_AI_Alerting_Framework.md](reveal-ai/Reveal_AI_Alerting_Framework.md) | Reveal AI architecture |

@@ -17,6 +17,8 @@ Event ID Ranges:
     - 1300-1399: Job Queue events
     - 1400-1499: Security Audit events
     - 1500-1599: Alert Manager events
+    - 1600-1699: aiR for Review events
+    - 1700-1799: aiR for Privilege events
     - 2000-2099: Reveal AI API Health events
     - 2100-2199: Reveal AI Job events
     - 2200-2299: Reveal AI Export events
@@ -76,6 +78,10 @@ EVENT_ID_BASE = {
     "job_queue": 1300,
     "security_audit": 1400,
     "alert_manager": 1500,
+    # RelativityOne aiR monitors
+    "air_review": 1600,
+    "air_privilege": 1700,
+    "air_job": 1600,  # Alias for combined aiR monitor
     # Reveal AI monitors
     "reveal_api_health": 2000,
     "reveal_job": 2100,
