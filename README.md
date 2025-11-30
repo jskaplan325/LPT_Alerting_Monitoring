@@ -18,27 +18,27 @@ A comprehensive alerting and monitoring solution for **RelativityOne** and **Rev
 ```
 LPT_Alerting_Monitoring/
 ├── README.md                              # This file
-├── eDiscovery_Alerting_Framework.md       # Overall architecture & design
 │
-├── runbooks/                              # RelativityOne Runbooks
-│   ├── README.md                          # Runbook index
-│   └── RUNBOOK-001 through RUNBOOK-018    # 18 operational runbooks
-│
-├── scripts/                               # RelativityOne Scripts
-│   ├── README.md                          # Script documentation
-│   ├── config.example.json                # Configuration template
-│   ├── scom_integration.py                # SCOM/Event Log helper module
-│   └── *_monitor.py                       # 6 monitoring scripts
+├── relativity-one/                        # RelativityOne Platform
+│   ├── eDiscovery_Alerting_Framework.md   # RelativityOne architecture
+│   ├── runbooks/
+│   │   ├── README.md                      # Runbook index
+│   │   └── RUNBOOK-001 through RUNBOOK-018
+│   └── scripts/
+│       ├── README.md                      # Script documentation
+│       ├── config.example.json            # Configuration template
+│       ├── scom_integration.py            # SCOM/Event Log helper
+│       └── *_monitor.py                   # 6 monitoring scripts
 │
 └── reveal-ai/                             # Reveal AI Platform
     ├── Reveal_AI_Alerting_Framework.md    # Reveal AI architecture
     ├── runbooks/
     │   ├── README.md                      # Runbook index
-    │   └── REVEAL-001 through REVEAL-008  # 8 operational runbooks
+    │   └── REVEAL-001 through REVEAL-008
     └── scripts/
         ├── README.md                      # Script documentation
         ├── config.example.json            # Configuration template
-        ├── scom_integration.py            # SCOM/Event Log helper module
+        ├── scom_integration.py            # SCOM/Event Log helper
         └── reveal_*_monitor.py            # 3 monitoring scripts
 ```
 
@@ -91,14 +91,14 @@ LPT_Alerting_Monitoring/
 pip install requests python-dateutil
 
 # 2. Configure
-cp scripts/config.example.json scripts/config.json
+cp relativity-one/scripts/config.example.json relativity-one/scripts/config.json
 # Edit with your RelativityOne OAuth credentials
 
 # 3. Test
-python scripts/telemetry_agent_monitor.py --config scripts/config.json --dry-run --verbose
+python relativity-one/scripts/telemetry_agent_monitor.py --config relativity-one/scripts/config.json --dry-run --verbose
 
 # 4. Run
-python scripts/telemetry_agent_monitor.py --config scripts/config.json
+python relativity-one/scripts/telemetry_agent_monitor.py --config relativity-one/scripts/config.json
 ```
 
 ---
@@ -224,27 +224,27 @@ python reveal-ai/scripts/reveal_api_health_monitor.py --config reveal-ai/scripts
 
 ```bash
 # Critical - every minute
-* * * * * python /opt/monitoring/telemetry_agent_monitor.py --config config.json
-* * * * * python /opt/monitoring/billing_agent_monitor.py --config config.json
-* * * * * python /opt/monitoring/alert_manager_monitor.py --config config.json
-* * * * * python /opt/monitoring/worker_health_monitor.py --config config.json
+* * * * * python /opt/monitoring/relativity-one/scripts/telemetry_agent_monitor.py --config config.json
+* * * * * python /opt/monitoring/relativity-one/scripts/billing_agent_monitor.py --config config.json
+* * * * * python /opt/monitoring/relativity-one/scripts/alert_manager_monitor.py --config config.json
+* * * * * python /opt/monitoring/relativity-one/scripts/worker_health_monitor.py --config config.json
 
 # High - every 5 minutes
-*/5 * * * * python /opt/monitoring/job_queue_monitor.py --config config.json
-*/5 * * * * python /opt/monitoring/security_audit_monitor.py --config config.json
+*/5 * * * * python /opt/monitoring/relativity-one/scripts/job_queue_monitor.py --config config.json
+*/5 * * * * python /opt/monitoring/relativity-one/scripts/security_audit_monitor.py --config config.json
 ```
 
 ### Reveal AI
 
 ```bash
 # Critical - every minute
-* * * * * python /opt/monitoring/reveal_api_health_monitor.py --config config.json
+* * * * * python /opt/monitoring/reveal-ai/scripts/reveal_api_health_monitor.py --config config.json
 
 # High - every 5 minutes
-*/5 * * * * python /opt/monitoring/reveal_job_monitor.py --config config.json
+*/5 * * * * python /opt/monitoring/reveal-ai/scripts/reveal_job_monitor.py --config config.json
 
 # Medium - every 15 minutes
-*/15 * * * * python /opt/monitoring/reveal_export_monitor.py --config config.json
+*/15 * * * * python /opt/monitoring/reveal-ai/scripts/reveal_export_monitor.py --config config.json
 ```
 
 ---
@@ -253,9 +253,9 @@ python reveal-ai/scripts/reveal_api_health_monitor.py --config reveal-ai/scripts
 
 | Document | Description |
 |----------|-------------|
-| [eDiscovery_Alerting_Framework.md](eDiscovery_Alerting_Framework.md) | Overall architecture & platform comparison |
-| [runbooks/README.md](runbooks/README.md) | RelativityOne runbook index |
-| [scripts/README.md](scripts/README.md) | RelativityOne script documentation |
+| [relativity-one/eDiscovery_Alerting_Framework.md](relativity-one/eDiscovery_Alerting_Framework.md) | RelativityOne architecture & design |
+| [relativity-one/runbooks/README.md](relativity-one/runbooks/README.md) | RelativityOne runbook index |
+| [relativity-one/scripts/README.md](relativity-one/scripts/README.md) | RelativityOne script documentation |
 | [reveal-ai/Reveal_AI_Alerting_Framework.md](reveal-ai/Reveal_AI_Alerting_Framework.md) | Reveal AI architecture |
 | [reveal-ai/runbooks/README.md](reveal-ai/runbooks/README.md) | Reveal AI runbook index |
 | [reveal-ai/scripts/README.md](reveal-ai/scripts/README.md) | Reveal AI script documentation |

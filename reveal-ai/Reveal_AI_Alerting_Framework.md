@@ -266,7 +266,8 @@ For enhanced monitoring capabilities, contact Reveal Data support (support@revea
 
 - [Reveal AI Runbooks](runbooks/README.md)
 - [Reveal AI Monitoring Scripts](scripts/README.md)
-- [Main Alerting Framework](../eDiscovery_Alerting_Framework.md)
+- [RelativityOne Alerting Framework](../relativity-one/eDiscovery_Alerting_Framework.md)
+- [Main README](../README.md)
 
 ---
 
