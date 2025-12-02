@@ -222,7 +222,24 @@
 
 ## Implementation Roadmap
 
-### Phase 1: Quick Wins (Ready to Deploy)
+### Phase 1: Research & Discovery (DO FIRST)
+
+> **Rationale:** Complete research before deployment to identify script reuse opportunities and avoid duplicate work.
+
+| Action | Platform | Owner | Dependency | Template |
+|--------|----------|-------|------------|----------|
+| Investigate RelaiR API/coverage | RelaiR | Practice Delivery | None | `research/RelaiR_Investigation.md` |
+| Investigate ASK capabilities | ASK | Practice Delivery | None | `research/ASK_Investigation.md` |
+| Investigate AJII capabilities | AJII | Practice Delivery | None | `research/AJII_Investigation.md` |
+| Assess NexLP/Brainspace API | Brainspace | Practice Delivery | Reveal support | `research/NexLP_Brainspace_Investigation.md` |
+| Attend SCOM expansion call | Rel Server | Server Ops + PD | **Dec 2, 2025** | N/A |
+
+**Key Questions to Answer:**
+- Does `air_job_monitor.py` already cover RelaiR?
+- Can Reveal AI scripts be adapted for NexLP/Brainspace?
+- Do ASK/AJII have APIs or native monitoring?
+
+### Phase 2: Quick Wins (Ready to Deploy)
 
 | Action | Platform | Owner | Dependency |
 |--------|----------|-------|------------|
@@ -230,25 +247,17 @@
 | Deploy air_job_monitor.py | RelativityOne | Practice Delivery | OAuth credentials |
 | Deploy reveal_api_health_monitor.py | Reveal Cloud | Practice Delivery | Session credentials |
 | Configure CaseStatisticsNotificationList | Rel Server | Practice Delivery | None |
-| Attend SCOM expansion call | Rel Server | Server Ops + PD | Dec 2, 2025 |
 
-### Phase 2: Full Deployment
-
-| Action | Platform | Owner | Dependency |
-|--------|----------|-------|------------|
-| Deploy all 6 RelativityOne scripts | RelativityOne | Practice Delivery | Phase 1 complete |
-| Deploy all 3 Reveal AI scripts | Reveal Cloud | Practice Delivery | Phase 1 complete |
-| Configure SCOM management pack | Both | Server Ops | Scripts deployed |
-| Set up alert channels | Both | Practice Delivery | Scripts deployed |
-
-### Phase 3: Research & Expand
+### Phase 3: Full Deployment (Informed by Phase 1)
 
 | Action | Platform | Owner | Dependency |
 |--------|----------|-------|------------|
-| Document RelaiR API capabilities | RelaiR | Practice Delivery | Vendor contact |
-| Document ASK/AJII capabilities | ASK/AJII | Practice Delivery | Vendor contact |
-| Assess NexLP API options | Brainspace | Practice Delivery | Reveal support |
-| Evaluate Environment Watch | Rel Server | Practice Delivery | Jan 2024 migration |
+| Deploy all 6 RelativityOne scripts | RelativityOne | Practice Delivery | Phase 2 complete |
+| Deploy all 3 Reveal AI scripts | Reveal Cloud | Practice Delivery | Phase 2 complete |
+| Deploy adapted scripts for new platforms | RelaiR/ASK/AJII/Brainspace | Practice Delivery | Phase 1 findings |
+| Configure SCOM management pack | All | Server Ops | Scripts deployed |
+| Set up alert channels | All | Practice Delivery | Scripts deployed |
+| Update Excel matrix with final coverage | All | Practice Delivery | Phase 3 complete |
 
 ---
 
