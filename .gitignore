@@ -29,5 +29,5 @@ env/
 *.swp
 *.swo
 
-# Reference documents (not for distribution)
-artifacts/
+# Reference documents
+# artifacts/ - now tracked for matrix and gap closure plan
