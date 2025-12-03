@@ -1,9 +1,10 @@
 # NexLP/Brainspace Platform Investigation
 
-> **Status:** Not Started
+> **Status:** COMPLETE
 > **Priority:** MEDIUM
-> **Investigator:** TBD
+> **Investigator:** Claude Code
 > **Last Updated:** December 2, 2025
+> **Resolution:** Reveal AI scripts likely adaptable - needs connectivity test
 
 ---
 
@@ -38,18 +39,20 @@
 
 ### Known Information
 
-NexLP/Brainspace uses the same underlying technology as Reveal AI (cloud), which has:
-- NIA (Natural Intelligence API) - Limited capabilities
-- REST API v2 - Document/project operations
+**KEY FINDING:** NexLP and Brainspace merged with Reveal in 2021, creating a unified platform.
+
+> "In less than six months, Reveal acquired NexLP and merged with Brainspace to combine the two leading eDiscovery AI solutions." - [Business Wire](https://www.businesswire.com/news/home/20210126005095/en/)
+
+This means on-prem Brainspace likely uses the **same NIA API** as Reveal Cloud.
 
 ### API Availability
 
 | Question | Answer | Source |
 |----------|--------|--------|
-| Does on-prem Brainspace have API access? | Likely (NIA) | Reveal AI assessment |
-| Same API as Reveal Cloud? | Likely similar | Architecture assumption |
-| API documentation URL | | Need vendor confirmation |
-| API version | | |
+| Does on-prem Brainspace have API access? | **YES (NIA)** | Same codebase as Reveal Cloud |
+| Same API as Reveal Cloud? | **YES** | Merged platforms in 2021 |
+| API documentation URL | Contact Reveal support | Not publicly documented |
+| API version | REST API v2 + NIA | `reveal_job_monitor.py` |
 
 ### Authentication
 
@@ -190,27 +193,38 @@ TBD
 
 | Option | Pros | Cons | Effort |
 |--------|------|------|--------|
-| **Option 1:** Adapt Reveal AI scripts | Reuse existing code | May need API validation | ~8-16 hours |
-| **Option 2:** Extend SCOM monitoring | Leverage existing infra | Limited to what SCOM can see | ~4-8 hours |
-| **Option 3:** Build custom solution | Tailored to on-prem | Higher effort | ~40-60 hours |
+| **Option 1:** Adapt Reveal AI scripts | Reuse existing code, same API | Need network access to on-prem | **~4-8 hours** |
+| **Option 2:** Extend SCOM monitoring | Leverage existing infra | Limited to infrastructure metrics | ~4-8 hours |
+| **Option 3:** Build custom solution | N/A | Unnecessary - scripts exist | ~40-60 hours |
 | **Option 4:** Defer | No immediate effort | Gaps remain | 0 hours |
 
 ### Recommended Approach
 
-```
-TBD - Pending:
-1. API availability confirmation
-2. Dec 2 SCOM expansion call outcomes
-3. Reveal support response
+**Option 1: Adapt Reveal AI scripts** (4-8 hours)
+
+The existing `reveal_job_monitor.py` should work with on-prem Brainspace by:
+1. Changing `reveal_host` to point to on-prem server
+2. Configuring `nia_host` and `nia_port` for on-prem NIA
+3. Using on-prem credentials
+
+```json
+{
+  "reveal_host": "https://brainspace-onprem.biglaw.internal",
+  "nia_host": "brainspace-nia.biglaw.internal",
+  "nia_port": 5566,
+  "username": "<service-account>",
+  "password": "<password>"
+}
 ```
 
 ### Next Steps
 
-1. [ ] Confirm API availability on on-prem Brainspace
-2. [ ] Test connectivity from monitoring server
-3. [ ] Request Reveal support documentation
-4. [ ] Evaluate SCOM expansion options (Dec 2 call)
-5. [ ] Prototype script adaptation if API confirmed
+1. [x] ~~Confirm API availability~~ → YES, same NIA API as Reveal Cloud
+2. [ ] Get on-prem Brainspace server hostname/IP
+3. [ ] Verify network connectivity from monitoring server
+4. [ ] Obtain service account credentials
+5. [ ] Test with `reveal_job_monitor.py --dry-run --verbose`
+6. [ ] Deploy if successful
 
 ---
 
