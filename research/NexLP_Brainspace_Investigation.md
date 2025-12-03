@@ -16,7 +16,7 @@
 | **Vendor** | Reveal (formerly Brainspace) |
 | **Deployment** | On-premises |
 | **Current Monitoring** | SCOM (Heartbeat, CPU, RAM only) |
-| **Kirkland Usage** | eDiscovery analytics |
+| **BigLaw Usage** | eDiscovery analytics |
 
 ### Business Context
 

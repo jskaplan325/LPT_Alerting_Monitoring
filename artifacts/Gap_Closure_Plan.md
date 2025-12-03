@@ -99,7 +99,7 @@
 **Current State (from email):**
 - SCOM: Heartbeat, CPU, RAM, Relativity services
 - Instance Settings configured:
-  - `LockoutNotificationList`: josh.haley@kirkland.com;john.delgado@kirkland.com;barry.peters@kirkland.com
+  - `LockoutNotificationList`: configured for BigLaw team distribution list
   - `CaseStatisticsNotificationList`: Not configured
 - LPT: Queue visibility for job blocking
 - Custom Pages: Manual app pool recycling after LPT alert
@@ -117,7 +117,7 @@
 
 1. **Immediate (Instance Setting):**
    ```
-   CaseStatisticsNotificationList = josh.haley@kirkland.com;john.delgado@kirkland.com;barry.peters@kirkland.com
+   CaseStatisticsNotificationList = <BigLaw-team-distribution-list>
    ```
 
 2. **Dec 2, 2025 SCOM Call Agenda Items:**

@@ -16,11 +16,11 @@
 | **Vendor** | TBD |
 | **Deployment** | SaaS |
 | **Current Monitoring** | Vendor uptime only |
-| **Kirkland Usage** | TBD |
+| **BigLaw Usage** | TBD |
 
 ### Business Context
 
-*Document how Kirkland uses this platform, what data resides there, and criticality to operations.*
+*Document how BigLaw uses this platform, what data resides there, and criticality to operations.*
 
 - [ ] Document primary use cases
 - [ ] Identify active workspaces/projects
@@ -157,5 +157,5 @@ TBD - Complete investigation first
 ### Next Steps
 
 1. [ ] Identify platform vendor
-2. [ ] Document current Kirkland usage
+2. [ ] Document current BigLaw usage
 3. [ ] Request API documentation
